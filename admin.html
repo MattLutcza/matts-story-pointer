@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Socket.IO chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+    <script src="client-name.js"></script>
+    <script src="users-connected.js"></script>
+    <script src="voting.js"></script>
+    <script src="vote-results.js "></script>
+</head>
+
+<body>
+    <div class="container-fluid navbar navbar-light bg-light">
+        <h1 class="navbar-brand">Matt's Pointing Picker</h1>  
+        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#usernameModal">
+           User Information
+        </a>        
+    </div>
+  
+    <!-- User Information Modal -->
+    <div class="modal fade" id="usernameModal" tabindex="-1" aria-labelledby="usernameModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="usernameModalLabel">User Information</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <section class="m-2">
+                        <h4>Your Username: <span id='currentName'></span></h4>
+                        <div class="input-group">                            
+                            <button id="nameButton" class="btn btn-primary" type="button">Update Name</button>
+                            <input id="nameInput" class="form-control" autocomplete="off">
+                          </div>
+                    </section>                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start -->
+    <div class="container">    
+        <section class="m-2">
+            <h4>Users Currently Connected: <span id='numberOfUsers'></span></h4>
+            <ul id="usersConnected" class="list-group list-group-flush"></ul>            
+        </section>    
+        <section class="m-2">
+            <button id="startVotesButton" type="button" class="btn btn-primary m-2">Start Voting</button>
+            <button id="clearVotesButton" type="button" class="btn btn-secondary m-2">Clear Votes</button>    
+        </section>
+        <section id="voteSection" class="m-2" style="display: none;">
+            <h4>Select Your Vote</h4>
+            <h5>Your vote: <span id="pointVote"></span></h5>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pointSelection" id="points1" value="1">
+                <label class="form-check-label" for="points1">
+                  1 Point
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pointSelection" id="points2" value="2">
+                <label class="form-check-label" for="points2">
+                    2 Points
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pointSelection" id="points3" value="3">
+                <label class="form-check-label" for="points3">
+                    3 points
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pointSelection" id="points5" value="5">
+                <label class="form-check-label" for="points5">
+                    5 Points
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pointSelection" id="points8" value="8">
+                <label class="form-check-label" for="points8">
+                    8 Points
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pointSelection" id="points13" value="13">
+                <label class="form-check-label" for="points13">
+                    13 Points
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pointSelection" id="pointsMoreInfo" value="Need More Info">
+                <label class="form-check-label" for="pointsMoreInfo">
+                    Need More Info To Decide
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pointSelection" id="pointsNA" value="N/A">
+                <label class="form-check-label" for="pointsNA">
+                    Not Applicable To Me
+                </label>
+            </div>
+            <br>
+            <button id="voteButton" class="btn btn-primary m-2">Submit Vote</button>            
+        </section>
+        <section id="voteWaitingSection" class="m-2" style="display: none;">
+            <h4 id="voteWaitingHeader">Waiting For Users To Finish Voting...</h4>
+            <h4 id="voteCompleteHeader" style="display: none;">Voting Complete!</h4>
+            <ul id="usersVoted" class="list-group list-group-flush"></ul>
+            <button id="showVotesButton" type="button" class="btn btn-primary m-2" disabled="true">Show Votes</button>
+        </section>
+        <section id="voteResultsSection" class="m-2" style="display: none;">
+            <h4>Vote Results</h4>
+            <table class="table">
+                <tr>
+                    <th></th>
+                    <th id="headerNA">N/A</th>
+                    <th id="headerNeedMoreInfo">Need More Info</th>
+                    <th id="headerPoints1">1 Point</th>
+                    <th id="headerPoints2">2 Points</th>
+                    <th id="headerPoints3">3 Points</th>
+                    <th id="headerPoints5">5 Points</th>
+                    <th id="headerPoints8">8 Points</th>
+                    <th id="headerPoints13">13 Points</th>     
+                </tr>
+                <tr>
+                    <td>Number Of Votes</td>
+                    <td id="resultsNA"></td>
+                    <td id="resultsNeedMoreInfo"></td>
+                    <td id="resultsPoints1"></td>
+                    <td id="resultsPoints2"></td>
+                    <td id="resultsPoints3"></td>
+                    <td id="resultsPoints5"></td>
+                    <td id="resultsPoints8"></td>
+                    <td id="resultsPoints13"></td>              
+                </tr>            
+            </table>
+            <h5>Average Points: <span id="resultsAverage"></span></h5>
+        </section>
+    </div>
+
+    <script>
+        var socket = io();
+        initializeNameInteractions(socket);
+        initializeUsersConnected(socket);      
+        initializeVotingInteractions(socket);
+        handleShowVotingResults(socket);
+    </script>
+</body>
+
+</html>
