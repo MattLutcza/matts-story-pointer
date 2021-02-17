@@ -1,12 +1,12 @@
 {
-  "name": "story-pointer-project",
+  "name": "matts-story-pointer",
   "version": "1.0.0",
-  "description": "Application to assign points to stories.",
+  "description": "Application that allows multiple users to connect and vote on points for stories.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "author": "",
+  "author": "Matt Lutcza",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
