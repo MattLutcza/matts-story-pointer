@@ -1,5 +1,6 @@
 function initializeVotingInteractions(socket) {
     
+    var voteSelectionHeader = document.getElementById('voteSectionVote');
     var voteSelectionDisplay = document.getElementById('voteSection');
     var pointRadioButtons = document.getElementsByName('pointSelection');
     var pointSelectionDisplay = document.getElementById('pointVote');
@@ -18,45 +19,28 @@ function initializeVotingInteractions(socket) {
 
     if (startVotesButton) {
         startVotesButton.onclick = function() {
-            socket.emit('start votes');
+            socket.emit('start voting');            
+            startVotesButton.disabled = true;
         }
     }
     if (clearVotesButton) {
         clearVotesButton.onclick = function() {
             socket.emit('clear votes');
+            startVotesButton.disabled = false;
         }   
     }
     if (showVotesButton) {
         showVotesButton.onclick = function() {
             socket.emit('show vote results');
+            startVotesButton.disabled = false;
         }
-    }
-
-    // When start voting is pressed - Handle that
-    socket.on('start votes', (startVotingData) => {
-        // Show the voting section
-        voteSelectionDisplay.style.display = "block";
-
-        // Show the vote waiting section
-        voteWaitingDisplay.style.display = "block";
-
-        // Build initial list of voters
-        startVotingData.allUsersVoting.forEach(user => {
-            var userVoteDisplay = document.createElement('li');
-            userVoteDisplay.textContent = user;
-            userVoteDisplay.className = "list-group-item";
-            usersVotedDisplay.appendChild(userVoteDisplay);
-        });
-
-        voteWaitingHeader.style.display = "block";
-        voteCompleteHeader.style.display = "none";
-    });
+    }    
     
     voteButton.onclick = function() {
         for(radioButtonIndex in pointRadioButtons) {
             if (pointRadioButtons[radioButtonIndex].checked) {
                 const voteAmount = pointRadioButtons[radioButtonIndex].value;
-                socket.emit('vote amount', voteAmount);
+                socket.emit('user voted', voteAmount);
                 pointSelectionDisplay.textContent = voteAmount;                    
                 // only one radio can be logically checked, don't check the rest
                 break;
@@ -65,13 +49,23 @@ function initializeVotingInteractions(socket) {
     };
 
     // When someone votes - Handle updating the waiting section
-    socket.on('user voted', (voteResults) => {
+    socket.on('user voted', (voteResults) => {        
+        // Show the voting section
+        voteSelectionHeader.style.display = "block";
+        voteSelectionDisplay.style.display = "block";
+
+        // Show the vote waiting section
+        voteWaitingDisplay.style.display = "block";
+
+        // hide vote results section until done voting
+        voteResultsDisplay.style.display = "none";
 
         // remove all elements from user voted list
         while (usersVotedDisplay.firstChild) {
             usersVotedDisplay.removeChild(usersVotedDisplay.lastChild);
         }
-
+        console.log(voteResults.allUsersVoting);
+        console.log(voteResults.userVotes);
         voteResults.allUsersVoting.forEach(user => {
             var userVoteDisplay = document.createElement('li');
             userVoteDisplay.textContent = user;                              
@@ -88,6 +82,13 @@ function initializeVotingInteractions(socket) {
             usersVotedDisplay.appendChild(userVoteDisplay);
         });
 
+        const userIndex = voteResults.userVotes.findIndex(userVoteInfo => {
+            return userVoteInfo.name === socket.appData.userName;
+        });  
+        if (userIndex === -1) {
+            pointSelectionDisplay.textContent = "";
+        }
+
         if (voteResults.allUsersVoting.length === voteResults.userVotes.length) {                      
             voteWaitingHeader.style.display = "none";
             voteCompleteHeader.style.display = "block";
@@ -95,12 +96,17 @@ function initializeVotingInteractions(socket) {
             if(showVotesButton) {
                 showVotesButton.disabled = false;
             }
-        }          
+        } else {
+            voteWaitingHeader.style.display = "block";
+            voteCompleteHeader.style.display = "none";
+            showVotesButton.disabled = true;
+        }
     });
 
     socket.on('clear votes', () => {
         // hide voting ability
         pointSelectionDisplay.textContent = "";
+        voteSelectionHeader.style.display = "none";
         voteSelectionDisplay.style.display = "none";
 
         // clear vote section
@@ -108,7 +114,9 @@ function initializeVotingInteractions(socket) {
             usersVotedDisplay.removeChild(usersVotedDisplay.lastChild);
         }
         // hide vote waiting section
-        voteWaitingDisplay.style.display = "none";
+        voteWaitingDisplay.style.display = "none";        
+        voteWaitingHeader.style.display = "block";
+        voteCompleteHeader.style.display = "none";
 
         // hide vote results section
         voteResultsDisplay.style.display = "none";

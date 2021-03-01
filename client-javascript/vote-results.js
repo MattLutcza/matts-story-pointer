@@ -1,5 +1,9 @@
 function handleShowVotingResults(socket) {
 
+    var voteSelectionDisplay = document.getElementById('voteSection');
+    var voteWaitingDisplay = document.getElementById('voteWaitingSection');
+    var usersVotedDisplay = document.getElementById('usersVoted');   
+
     var voteResultsDisplay = document.getElementById('voteResultsSection');
     
     // Table Headers
@@ -14,6 +18,16 @@ function handleShowVotingResults(socket) {
     // When show results is pressed - Handle showing the results
     socket.on('show vote results', (voteResults) => {
 
+        // hide voting ability        
+        voteSelectionDisplay.style.display = "none";
+
+        // clear vote section
+        while (usersVotedDisplay.firstChild) {
+            usersVotedDisplay.removeChild(usersVotedDisplay.lastChild);
+        }
+        // hide vote waiting section
+        voteWaitingDisplay.style.display = "none";
+
         let voteResultsMap = new Map();
         voteResultsMap.set('1', 0);
         voteResultsMap.set('2', 0);
@@ -25,6 +39,7 @@ function handleShowVotingResults(socket) {
         voteResultsMap.set('N/A', 0);
         let voteSum = 0;
         let counterForAverage = 0;
+        
         // Go through results, figure out how many points have how many votes
         for(voteResultIndex in voteResults.userVotes) {
             let vote = voteResults.userVotes[voteResultIndex].vote;           

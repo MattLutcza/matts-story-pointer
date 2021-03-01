@@ -8,19 +8,83 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
 
-    <script src="client-name.js"></script>
-    <script src="users-connected.js"></script>
-    <script src="voting.js"></script>
-    <script src="vote-results.js "></script>
-
+    <script src="/client-name.js"></script>
+    <script src="/admin.js"></script>
+    <script src="/users-connected.js"></script>
+    <script src="/voting.js"></script>
+    <script src="/vote-results.js "></script>
 </head>
 
 <body>
-    <div class="container-fluid navbar navbar-light bg-light">
-        <h1 class="navbar-brand">Matt's Pointing Picker</h1>  
-        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#usernameModal">
-           User Information
-        </a>        
+
+    <!-- Password Modal -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" data-bs-backdrop="static" 
+        aria-labelledby="passwordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="passwordModalLabel">Join Room</h4>
+                </div>
+                <div class="modal-body">                    
+                    <label for="roomPassword" class="form-label">Room Password</label>
+                    <div class="input-group mb-3">
+                        <input type="password" class="form-control" id="roomPassword" autocomplete="off">
+                    </div>                                 
+                </div>
+                <div class="modal-footer">                    
+                    <button id="withPasswordButton" type="button" class="btn btn-primary">
+                        Join Room
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <h1 class="navbar-brand">Matt's Pointing Picker</h1>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/home">Home</a>
+                    </li>                           
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="#" data-bs-toggle="modal" data-bs-target="#usernameModal">Username Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="#" data-bs-toggle="modal" data-bs-target="#adminModal">Admin Settings</a>
+                    </li>        
+                </ul>                
+            </div>
+        </div>
+    </nav>    
+
+    <!-- Admin Information Modal -->
+    <div class="modal fade" id="adminModal" tabindex="-1" aria-labelledby="adminModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="adminModalLabel">Admin Information</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h5>Current Admin: <span id='currentAdmin'></span></h4>
+                    <section id="adminSelection" class="mt-2">
+                        <h5>Change Admin</h4>
+                        <div id="adminRadioSelection"></div>                        
+                        <div class="input-group m-2">
+                            <button id="adminButton" class="btn btn-primary" type="button">Update Admin</button>                            
+                        </div>
+                    </section>                    
+                </div>
+            </div>
+        </div>
     </div>
   
     <!-- User Information Modal -->
@@ -33,25 +97,30 @@
                 </div>
                 <div class="modal-body">
                     <section class="m-2">
-                        <h4>Your Username: <span id='currentName'></span></h4>
+                        <h5>Your Username: <span id='currentName'></span></h4>
                         <div class="input-group">                            
                             <button id="nameButton" class="btn btn-primary" type="button">Update Name</button>
                             <input id="nameInput" class="form-control" autocomplete="off">
-                          </div>
+                        </div>
                     </section>                    
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="container">    
-        <section class="m-2">
+    <div class="container">
+        <section class="m-2 p-2 border border-2 rounded">
             <h4>Users Currently Connected: <span id='numberOfUsers'></span></h4>
             <ul id="usersConnected" class="list-group list-group-flush"></ul>            
         </section>
-        <section id="voteSection" class="m-2" style="display: none;">
-            <h4>Select Your Vote</h4>
-            <h5>Your vote: <span id="pointVote"></span></h5>
+        <section id="voteButtons" class="m-2 p-2 border border-2 rounded" style="display:none">
+            <h4>Voting Controls</h4>
+            <button id="startVotesButton" type="button" class="btn btn-primary m-2">Start Voting</button>            
+            <button id="showVotesButton" type="button" class="btn btn-success m-2" disabled="true">Show Votes</button>    
+            <button id="clearVotesButton" type="button" class="btn btn-danger m-2">Clear Votes</button>
+        </section>        
+        <section id="voteSection" class="m-2 p-2 border border-2 rounded" style="display: none;">  
+            <h4>Vote Selection</h4>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="pointSelection" id="points1" value="1">
                 <label class="form-check-label" for="points1">
@@ -103,12 +172,15 @@
             <br>
             <button id="voteButton" class="btn btn-primary m-2">Submit Vote</button>            
         </section>
-        <section id="voteWaitingSection" class="m-2" style="display: none;">
+        <section id="voteSectionVote" class="m-2 p-1" style="display: none;">
+            <h4>Your Vote: <span id="pointVote" class="badge bg-success"></span></h4>
+        </section>
+        <section id="voteWaitingSection" class="m-2 p-2 border border-2 rounded" style="display: none;">
             <h4 id="voteWaitingHeader">Waiting For Users To Finish Voting...</h4>
             <h4 id="voteCompleteHeader" style="display: none;">Voting Complete!</h4>
-            <ul id="usersVoted" class="list-group list-group-flush"></ul>            
+            <ul id="usersVoted" class="list-group list-group-flush"></ul>                       
         </section>
-        <section id="voteResultsSection" class="m-2" style="display: none;">
+        <section id="voteResultsSection" class="m-2 p-2 border border-2 rounded" style="display: none;">
             <h4>Vote Results</h4>
             <table class="table">
                 <tr>
@@ -140,10 +212,77 @@
 
     <script>
         var socket = io();
-        initializeNameInteractions(socket);
+        socket.appData = {};
+
+        // get the room name from the query parameter
+        const roomName = getParameterByName('roomName');
+
+        // if there is a valid query parameter, get the room information from the server
+        if (roomName) {
+            socket.emit('get room information', roomName);
+        } else {
+            // if no valid query parameter, send them back to the home page
+            window.location.href = "/home";
+        }
+
+        var passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+        let timer;
+        
+        socket.on('room information', roomInformation => {
+            // if the room exists, is marked private, and you are not the one who created 
+            // the private room (you are not the first user) then open up the password layer
+            if (roomInformation && 
+                roomInformation.isPrivate &&
+                roomInformation.usersInRoom.length > 0) {
+                // ten seconds to submit the password before sent to homepage
+                timer = setTimeout(()=> {                    
+                    window.location.href = "/home";
+                }, 10_000);
+                passwordModal.show();
+            } else {
+                // if room doesn't exist, or if it is public, or if you are the person who created the 
+                // private room (no users currently in the private room), then you can simply join
+                socket.emit('join room', {
+                    "roomName": roomName
+                });
+            }
+        });
+
+        // handle password layer
+        var roomPasswordInput = document.getElementById('roomPassword');        
+        var withPasswordButton = document.getElementById('withPasswordButton');
+        withPasswordButton.onclick = function () {
+            if (roomPasswordInput.value) {
+                if (timer) {
+                    clearTimeout(timer)
+                }                
+                socket.emit('join room', {
+                    "roomName": roomName,
+                    "password": roomPasswordInput.value
+                });
+                passwordModal.hide();
+            }
+        };
+        
+        socket.on('access denied', () => {
+            window.location.href = "/home";
+        });
+
+        createNameInteractions(socket);
+        createAdminInteractions(socket);
         initializeUsersConnected(socket);      
         initializeVotingInteractions(socket);
         handleShowVotingResults(socket);
+
+        function getParameterByName(name, url = window.location.href) {
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
     </script>
 </body>
 

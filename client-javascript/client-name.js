@@ -1,4 +1,4 @@
-function initializeNameInteractions(socket) {
+function createNameInteractions(socket) {
     
     var nameButton = document.getElementById('nameButton');
     var nameInput = document.getElementById('nameInput');
@@ -10,6 +10,9 @@ function initializeNameInteractions(socket) {
 
     var nameDisplay = document.getElementById('currentName');
     socket.on('name set', (name) => {
-        nameDisplay.textContent = name;
+        console.log('new name');
+        console.log(name);
+        socket.appData.userName = name;
+        nameDisplay.textContent = name;        
     });
 }
