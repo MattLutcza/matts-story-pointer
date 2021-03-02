@@ -3,14 +3,14 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
-app.use(express.static('client-javascript'));
+app.use(express.static('client/javascript'));
 
 app.get('/home', (req, res) => {
-  res.sendFile(__dirname + '/home.html');
+  res.sendFile(__dirname + '/client/templates/home.html');
 });
 
 app.get('/room', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(__dirname + '/client/templates/room.html');
 });
 
 server.listen(3000, () => {

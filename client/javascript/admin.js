@@ -1,8 +1,7 @@
 function createAdminInteractions(socket) {
 
     var currentAdmin = document.getElementById('currentAdmin');
-    var adminSelection = document.getElementById('adminSelection');
-    
+    var adminSelection = document.getElementById('adminSelection');    
     var voteButtons = document.getElementById('voteButtons');
 
     socket.on('new admin', (newAdmin) => {
@@ -13,13 +12,13 @@ function createAdminInteractions(socket) {
         const isAdmin = newAdmin.admin === socket.appData.userName;
         socket.appData.isAdmin = isAdmin;
 
-        // if admin - show what the admin can see.
+        // if the client is the admin then show what the admin can see.
+        // - the vote controls (buttons)
+        // - the ability to change the admin (in admin setting layer)
         if (isAdmin) {            
             voteButtons.style.display = "block";
-            // show admin selection in the admin info layer
             adminSelection.style.display = "block";
-        } else {
-            // otherwise hide those sections            
+        } else {               
             voteButtons.style.display = "none";
             adminSelection.style.display = "none";
         }

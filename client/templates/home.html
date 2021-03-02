@@ -11,13 +11,14 @@
     <script src="/rooms.js"></script>
 </head>
 <body>
+    <!-- Navigation Header -->
     <div class="container-fluid navbar navbar-light bg-light">
         <h1 class="navbar-brand">Matt's Pointing Picker</h1>
         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#createRoomModal">
             Create Room
          </a>  
     </div>
-
+    <!-- List of Available Rooms -->
     <div class="container">    
         <section class="m-2">
             <h4>Existing Rooms: <span id='numberOfRooms'></span></h4>           
@@ -25,6 +26,7 @@
         </section>
     </div>
 
+    <!-- Create Room Layer -->
     <div class="modal fade" id="createRoomModal" tabindex="-1" aria-labelledby="createRoomModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -66,7 +68,8 @@
                     </section>
                 </div>
                 <div class="modal-footer">
-                    <button id="createAndNavigate" type="button" class="btn btn-primary">Create Room</button>
+                    <button id="createAndNavigate" type="button" class="btn btn-primary"
+                        onclick="handleCreateRoomButtonClick();">Create Room</button>
                 </div>
             </div>
         </div>

@@ -9,9 +9,7 @@ function createNameInteractions(socket) {
     };
 
     var nameDisplay = document.getElementById('currentName');
-    socket.on('name set', (name) => {
-        console.log('new name');
-        console.log(name);
+    socket.on('name set', (name) => {       
         socket.appData.userName = name;
         nameDisplay.textContent = name;        
     });
